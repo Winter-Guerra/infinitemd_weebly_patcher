@@ -4,7 +4,9 @@ import {Request, Response} from "express";
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
+var winston = require('winston');
+var expressWinston = require('express-winston');
+require('winston-papertrail').Papertrail;
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
@@ -15,9 +17,21 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
+// Setup logger
+var winstonPapertrail = new winston.transports.Papertrail({
+  host: 'logs.papertrailapp.com',
+  port: 24057
+});
+var logger = new winston.Logger({
+  transports: [winstonPapertrail]
+});
+app.use(expressWinston.logger({
+      transports: [winstonPapertrail],
+      statusLevels: true
+}));
+
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -55,6 +69,12 @@ app.use(function(err: any, req: Request, res: Response, next: Function) {
     error: {}
   });
 });
+
+// express-winston errorLogger for those errors that are too big to recover from
+app.use(expressWinston.errorLogger({
+  transports: [winstonPapertrail],
+  statusLevels: true
+}));
 
 
 module.exports = app;

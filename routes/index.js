@@ -6,6 +6,20 @@ var axios_1 = require('axios');
 var origin_hostname = 'infinitemd.com';
 var CDN_whitelist = ["ajax.googleapis.com", "fonts.googleapis.com", "fonts.gstatic.com", "cdn2.editmysite.com", "cdn1.editmysite.com"];
 /*
+Redirect all hits to http[s]://infinitemd.com/XXX to the SSL site.
+Leave all other requests to the following middleware.
+*/
+router.get('*', function (req, res, next) {
+    console.log("origin: " + req.get('Origin'));
+    if (req.get('Origin') === 'https://infinitemd.com' || req.get('Origin') === 'http://infinitemd.com' || req.headers.get('host') === 'infinitemd.com') {
+        var new_url = "https://www.infinitemd.com" + req.originalUrl;
+        res.redirect(301, new_url);
+    }
+    else {
+        next();
+    }
+});
+/*
 This endpoint is called whenever CloudFront needs a file from the {subdomain}.infinitemd origin.
 We will find out which subdomain to use, get the HTML, then edit the page to redirect all external requests through infinitemd.
 */

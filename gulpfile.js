@@ -3,6 +3,7 @@ var ts = require('gulp-typescript');
 var clean = require('gulp-clean');
 var server = require('gulp-develop-server');
 var mocha = require('gulp-mocha');
+var gulpEbDeploy = require('gulp-elasticbeanstalk-deploy')
 
 var serverTS = ["**/*.ts", "!node_modules/**", '!bin/**'];
 
@@ -58,3 +59,27 @@ gulp.task('test', ['ts', 'load:fixtures'], function() {
             process.exit();
         });
 });
+
+gulp.task('deploy', ['ts'], function() {
+    return gulp
+    .src([
+        'app.js',
+        '**/*.js',
+        '**/*.js.map',
+        '**/*.json',
+        '**/*.hbs',
+        '!node_modules/**',
+        'public/**',
+        'bin/**',
+        '!gulpfile.js' // Don't include gulpfile since it's not needed.
+    ], {base: './'})
+    .pipe(gulpEbDeploy({
+        waitForDeploy: true, // optional: if set to false the task will end as soon as it starts deploying
+        amazon: {
+            region: 'us-east-1',
+            bucket: 'infinitemd-elasticbeanstalk-weebly-patcher',
+            applicationName: 'weebly_monkeypatch_service',
+            environmentName: 'Staging'
+        }
+    }))
+})
