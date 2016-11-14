@@ -13,10 +13,11 @@ Redirect all hits to http[s]://infinitemd.com/XXX to the SSL site.
 Leave all other requests to the following middleware.
 */
 router.get('*', (req: Request, res: Response, next: Function) => {
-  console.log(`origin: ${req.get('Origin')}`);
-  if (req.get('Origin') === 'https://infinitemd.com' || req.get('Origin') === 'http://infinitemd.com' || req.headers.get('host') === 'infinitemd.com') {
-    var new_url = `https://www.infinitemd.com${req.originalUrl}`
-    res.redirect(301, new_url);
+  console.log(`Origin requested: ${req.hostname}`);
+  if (req.hostname === 'infinitemd.com') {
+      // Redirect the user to the new domain.
+      var new_url = `https://www.infinitemd.com${req.originalUrl}`
+      res.redirect(301, new_url);
   } else {
     next();
   }

@@ -79,7 +79,7 @@ gulp.task('deploy', ['ts'], function() {
             region: 'us-east-1',
             bucket: 'infinitemd-elasticbeanstalk-weebly-patcher',
             applicationName: 'weebly_monkeypatch_service',
-            environmentName: 'Staging'
+            environmentName: 'Blue'
         }
     }))
 })
